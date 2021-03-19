@@ -1,0 +1,134 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="box-element">
+                <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
+                <hr>
+                {% for item in items %}
+                <div class="cart-row">
+                    <div style="flex: 2;">
+                        <img class="row-image" src="{{item.product.imageURL}}">
+                    </div>
+                    <div style="flex: 1">{{item.product.name}}</div>
+                    <div style="flex: 1">{{item.product.price}}</div>
+                    <div style="flex: 1">{{item.quantity}}</div>
+                    <div style="flex: 1">{{item.get_total}}</div>
+
+                </div>
+                {% endfor %}
+                <h5>Item  : <b>{{order.get_cart_items}}</b></h5>
+                <h5>Total : <b>{{order.get_cart_total}}</b></h5>
+            </div>
+        </div>
+        <div class="col-lg-6">  
+            <div class="box-element" id="wapper-form">
+                <h2>Summary</h2>
+                <form id="form">
+                    <div id="user-info">
+                        <div class="form-field">
+                            <input required class="form-control" name="name" placeholder="name">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" name="email" placeholder="email">
+                        </div>
+                    </div>
+                    <hr>
+                    <div id="shipping-info">
+                        <h4>Shipping-Info</h4>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="address" placeholder="Address">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="city" placeholder="City">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="state" placeholder="State">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="pincode" placeholder="Pincode">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="country" placeholder="Country">
+                        </div>
+                    </div>
+                    <br>
+                    <button id="form-button" class="btn btn-success btn-block " type="submit">Continue</button>
+                </form>
+
+            </div>
+            <div id="payment-info" class="box-element hidden " >
+                <h6>Paypal Option</h6>
+                <button id=make-payment style="background-color: rgb(23, 231, 23);">Make Payment</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        if(user != 'AnonymousUser'){
+            document.getElementById('user-info').innerHTML = "" ;
+        }
+        console.log('user:',user)
+        
+        var total = '{{order.get_cart_total}}';
+        var form = document.getElementById('form');
+
+        form.addEventListener('submit', function(e){
+            e.preventDefault()
+            console.log('working');
+            document.getElementById("form-button").classList.add('hidden');
+            document.getElementById("payment-info").classList.remove('hidden');
+        })
+
+        document.getElementById('payment-info').addEventListener('click', function(e){
+            processed()
+        })
+
+        function processed(){
+            var userInfo ={
+                'name' : null,
+                'email' : null,
+                'total':total,
+            }
+            var shippingInfo ={
+                'address':null,
+                'city':null,
+                'state':null,
+                'pincode':null,
+                'country':null,
+            }
+            shippingInfo.address = form.address.value
+            shippingInfo.city = form.city.value
+            shippingInfo.state = form.state.value
+            shippingInfo.pincode = form.pincode.value
+            shippingInfo.country = form.country.value
+
+            if(user == 'AnonymousUser'){
+                userInfo.name = form.name.value
+                userInfo.email = form.email.value
+            }
+
+            var url = '/orderProcessed/'
+
+            fetch(url,{
+                method : 'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                    'X-CSRFToken': csrftoken, 
+                },
+                body:JSON.stringify({'form':userInfo,'shipping':shippingInfo})
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success',data);
+                alert('transection complete')
+
+                cart ={}
+                document.cookie = "cart=" + JSON.stringify(cart) + ";domain=;path=/"
+                window.location.href = "{% url 'store' %}"
+            })
+        }
+
+    </script>
+{% endblock %}

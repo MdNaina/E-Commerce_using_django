@@ -1,0 +1,93 @@
+{% extends 'main.html'%}
+{% load static%}
+{% block content%}
+    <h1>Feedback</h1>
+    <form id="form">
+        <div id="user-info">
+            <div class="form-field">
+                <input required class="form-control" name="name" placeholder="name">
+            </div>
+            <div class="form-field">
+                <input required class="form-control" name="email" placeholder="email">
+            </div>
+        </div>
+        <hr>
+        <div id="feedback-content">
+            <div class="">
+                <input required class="form-control" type="text" name="title" placeholder="title of the subject"><br>
+            </div>
+            <hr>
+            <div class="">
+                <textarea style="height: 200px; width:300" required class="form-control" type="text" name="feedbackContent" placeholder="type you feedback here"></textarea>
+            </div>
+            
+        </div>
+        <br>
+        <button id="form-button" type="submit"  class="btn btn-success btn-block " >Submit</button>
+    </form>
+    <div id="confirm-feedback" class="box-element hidden">
+        <h6>Confirm your feedback ?</h6>
+        <button id="process-btn" class="btn btn-success">Confirm</button>
+    </div>
+    <script type="text/javascript">
+        console.log('User:',user)
+        if(user != 'AnonymousUser'){
+            document.getElementById('user-info').innerHTML = "<h3>USER : <b style='color:green'>{{user}}</b></h3> ";
+        }
+        var form = document.getElementById('form');
+
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            console.log("Working")
+            document.getElementById("confirm-feedback").classList.remove("hidden")
+            document.getElementById("form-button").classList.add('hidden')
+        })
+
+        async function addFeedback(){
+            var userInfo = {
+                'name' : null,
+                'email': null,                
+            }
+
+            var feedbackInfo = {
+                'title':null,
+                'feedback':null,
+            }
+
+            feedbackInfo.title = form.title.value
+            feedbackInfo.feedback = form.feedbackContent.value
+            
+            if ( user == 'AnonymousUser'){
+                userInfo.name = form.name.value
+                userInfo.email = form.email.value
+            }
+
+            var url = '/addFeedback/'
+            fetch(url,{
+                    method : 'POST',
+                    headers:{
+                        'Content-Type':'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body:JSON.stringify({'userForm':userInfo,'feedback':feedbackInfo})
+            })
+            await response => {
+                return JSON.stringify(response)
+            }
+            await data => {
+                console.log('data', data);
+                alert('Thanks for your feedback');
+                window.location.href = "{% url 'store' %}"
+            }
+            // .then(text => {
+            //     console.log('data:',text.text())
+            //     alert('thanks for your feedback');
+                
+            // })     
+        }
+
+        document.getElementById('process-btn').addEventListener("click", function(){
+            addFeedback()
+        })
+    </script>
+{% endblock %}

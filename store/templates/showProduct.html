@@ -1,0 +1,29 @@
+{% extends 'main.html' %}
+{% block content %}
+<br>
+<a class="btn btn-outline btn-dark" href="{% url 'store' %}">&#x2190; Continue Shopping</a>
+    <div class="row">
+        
+        <div class="col-lg-6">
+            <div class="box-element">
+                <img style="width: 100%;" src="{{product.imageURL}}" alt="">
+            </div>
+            
+        </div>
+        <div class="col-lg-6">
+            <div class="box-element">
+                <h1>{{product.name}}</h1>
+                <br><br>
+                <h3><b>price: {{product.price}}</b></h3>
+                <br><br>
+                <p>{{product.description}}</p>
+                <br><br>
+                <button style="float: left  ;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <br><br>
+            </div>
+            
+        </div>
+            
+        </div>
+    </div>
+{% endblock%}
